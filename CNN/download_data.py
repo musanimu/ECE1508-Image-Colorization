@@ -1,4 +1,4 @@
-"""Download the team's already-preprocessed colorization data from Google Drive."""
+"""Download the preprocessed colorization data from Google Drive."""
 
 from __future__ import annotations
 
