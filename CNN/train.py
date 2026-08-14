@@ -1,4 +1,4 @@
-"""Train the deterministic CNN colorization baseline."""
+"""Train the deterministic baseline."""
 
 from __future__ import annotations
 
