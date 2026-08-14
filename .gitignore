@@ -1,0 +1,8 @@
+*.h5
+*.pt
+*.pth
+__pycache__/
+.ipynb_checkpoints/
+CNN/outputs/
+shared_data/
+.DS_Store
