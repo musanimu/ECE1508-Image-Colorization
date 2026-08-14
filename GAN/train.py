@@ -20,11 +20,23 @@ from tqdm.auto import tqdm
 from .model import CGAN
 
 
-DATA_DIR = (
-    Path(__file__).resolve().parent.parent
-    / "cifar10_lab_v1-20260808T045604Z-1-001"
-    / "cifar10_lab_v1"
-)
+DATA_DIR = None  # resolved at startup via download_data.resolve_lab_data_dir()
+
+
+def get_data_dir() -> Path:
+    global DATA_DIR
+    if DATA_DIR is None:
+        try:
+            from download_data import resolve_lab_data_dir
+        except ImportError:
+            import sys
+
+            sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+            from download_data import resolve_lab_data_dir
+
+        DATA_DIR = resolve_lab_data_dir(Path(__file__).resolve().parent.parent)
+    return DATA_DIR
+
 
 PATCH_SIZE = 32
 D_LR_MULT = 0.1
@@ -230,10 +242,11 @@ def main() -> None:
     args = parse_args()
     torch.manual_seed(SEED)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"device={device}  data={DATA_DIR}")
+    data_dir = get_data_dir()
+    print(f"device={device}  data={data_dir}")
 
-    train_set = LabH5Dataset(DATA_DIR / "train_lab.h5")
-    val_set = LabH5Dataset(DATA_DIR / "validation_lab.h5")
+    train_set = LabH5Dataset(data_dir / "train_lab.h5")
+    val_set = LabH5Dataset(data_dir / "validation_lab.h5")
     train_loader = DataLoader(
         train_set,
         batch_size=args.batch_size,
