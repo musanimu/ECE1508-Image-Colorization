@@ -20,6 +20,14 @@ from tqdm.auto import tqdm
 from .model import CGAN
 
 
+PATCH_SIZE = 32
+D_LR_MULT = 0.1
+BETA1 = 0.0
+NUM_WORKERS = 2
+SEED = 42
+NUM_SAMPLES = 16
+CGAN_CKPT = Path(__file__).resolve().parent / "CGAN.pt"
+
 DATA_DIR = None  # resolved at startup via download_data.resolve_lab_data_dir()
 
 
@@ -36,14 +44,6 @@ def get_data_dir() -> Path:
 
         DATA_DIR = resolve_lab_data_dir(Path(__file__).resolve().parent.parent)
     return DATA_DIR
-
-
-PATCH_SIZE = 32
-D_LR_MULT = 0.1
-BETA1 = 0.0
-NUM_WORKERS = 2
-SEED = 42
-NUM_SAMPLES = 16
 
 
 class LabH5Dataset(Dataset):
@@ -88,8 +88,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--resume",
         type=Path,
-        default=None,
-        help="Load generator weights only from this checkpoint (D/opts always fresh)",
+        default=CGAN_CKPT,
+        help=f"Load generator weights only (default: {CGAN_CKPT.name}); skipped if file missing",
+    )
+    p.add_argument(
+        "--from-scratch",
+        action="store_true",
+        help="Ignore --resume / CGAN.pt and train a new generator",
     )
     return p.parse_args()
 
@@ -275,7 +280,7 @@ def main() -> None:
     ).to(device)
 
     start_epoch = 1
-    if args.resume is not None:
+    if not args.from_scratch and args.resume is not None and args.resume.exists():
         ckpt = load_generator_weights(model, args.resume, device)
         print(
             f"resumed G-only from {args.resume}  "
@@ -283,6 +288,10 @@ def main() -> None:
             f"prev_val_L1={ckpt.get('val_l1')}  prev_val_LPIPS={ckpt.get('val_lpips')}  "
             f"(fresh D + optimizers, epoch starts at 1)"
         )
+    elif args.from_scratch:
+        print("training generator from scratch (--from-scratch)")
+    else:
+        print(f"no checkpoint at {args.resume}; training generator from scratch")
 
     betas = (BETA1, 0.999)
     opt_G = torch.optim.Adam(model.G.parameters(), lr=args.lr, betas=betas)
@@ -309,7 +318,7 @@ def main() -> None:
         f"patch_size={PATCH_SIZE}  batch_size={args.batch_size}  "
         f"lr_decay={args.lr_decay}  out={args.out_dir}"
     )
-    print("checkpointing: G weights only — best.pt by val_LPIPS; also best_l1.pt")
+    print("checkpointing: G weights only — updates GAN/CGAN.pt on best val_LPIPS; also latest.pt each epoch")
 
     for epoch in range(start_epoch, end_epoch + 1):
         model.train()
@@ -387,16 +396,14 @@ def main() -> None:
         save_generator_ckpt(args.out_dir / "latest.pt", model, epoch, args, metrics)
         if metrics["val_lpips"] < best_lpips:
             best_lpips = metrics["val_lpips"]
-            save_generator_ckpt(args.out_dir / "best.pt", model, epoch, args, metrics)
-            print(f"  saved best.pt (val_LPIPS={best_lpips:.6f})")
+            save_generator_ckpt(CGAN_CKPT, model, epoch, args, metrics)
+            print(f"  saved {CGAN_CKPT} (val_LPIPS={best_lpips:.6f})")
         if metrics["val_l1"] < best_l1:
             best_l1 = metrics["val_l1"]
-            save_generator_ckpt(args.out_dir / "best_l1.pt", model, epoch, args, metrics)
-            print(f"  saved best_l1.pt (val_L1={best_l1:.6f})")
 
     print(
         f"done. best val_LPIPS={best_lpips:.6f}  best val_L1={best_l1:.6f}  "
-        f"checkpoints in {args.out_dir}"
+        f"best weights: {CGAN_CKPT}  latest: {args.out_dir / 'latest.pt'}"
     )
 
 
