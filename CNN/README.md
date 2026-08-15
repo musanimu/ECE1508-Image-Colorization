@@ -117,17 +117,6 @@ python3 CNN/evaluate.py \
   --output-dir CNN/outputs/cnn_mse/test
 ```
 
-Evaluation reports mean and standard deviation over the test set for normalized ab-space MSE and MAE, reconstructed RGB PSNR and SSIM, and inference time. It also produces random, best-case, failure-case, and class-based comparison grids.
-
-The selected MSE model produced:
-
-| Metric | Mean | Standard deviation |
-|---|---:|---:|
-| Normalized ab MSE | 0.008248 | 0.009561 |
-| Normalized ab MAE | 0.061918 | 0.032734 |
-| RGB PSNR | 25.2255 | 4.2655 |
-| RGB SSIM | 0.9386 | 0.0557 |
-
 ## File overview
 
 | File | Purpose |
