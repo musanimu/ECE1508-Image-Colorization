@@ -99,22 +99,26 @@ python3 CNN/train.py \
 
 ## Visualize a checkpoint
 
+The following command uses the checkpoint selected by minimum validation MSE during hyperparameter tuning:
+
 ```bash
 python3 CNN/visualize.py \
   --data-root shared_data \
   --split validation \
-  --checkpoint CNN/outputs/cnn_mse/best_model.pt \
-  --output CNN/outputs/cnn_mse/validation_examples.png
+  --checkpoint CNN/outputs/tuning_mse/lr_0p0005_bs_32/best_model.pt \
+  --output CNN/outputs/tuning_mse/selected_validation_examples.png
 ```
 
 ## Test evaluation
 
+Final test results are calculated using the same selected checkpoint (learning rate `0.0005`, batch size 32, best epoch 10):
+
 ```bash
 python3 CNN/evaluate.py \
   --data-root shared_data \
-  --checkpoint CNN/outputs/cnn_mse/best_model.pt \
+  --checkpoint CNN/outputs/tuning_mse/lr_0p0005_bs_32/best_model.pt \
   --batch-size 32 \
-  --output-dir CNN/outputs/cnn_mse/test
+  --output-dir CNN/outputs/tuning_mse/test
 ```
 
 ## File overview
