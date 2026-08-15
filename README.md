@@ -33,10 +33,13 @@ Together, these measurements assess reconstruction error, structural consistency
 ## Repository structure
 
 ```text
-CNN/                                  Deterministic baseline(autoencoder)
+CNN/                                  Deterministic CNN baseline
+CVAE/                                 Conditional VAE implementation and notebook
 GAN/                                  Conditional GAN implementation
+.gitignore                            Files excluded from version control
+README.md                             Project overview
+download_data.py                     Shared dataset downloader
 preprocess_image_colorization_data.py Shared preprocessing definition
 ```
 
 Detailed setup, training, tuning, visualization, and evaluation instructions for the deterministic baseline are available in [`CNN/README.md`](CNN/README.md).
-

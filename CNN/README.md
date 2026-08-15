@@ -99,34 +99,27 @@ python3 CNN/train.py \
 
 ## Visualize a checkpoint
 
+The following command uses the checkpoint selected by minimum validation MSE during hyperparameter tuning:
+
 ```bash
 python3 CNN/visualize.py \
   --data-root shared_data \
   --split validation \
-  --checkpoint CNN/outputs/cnn_mse/best_model.pt \
-  --output CNN/outputs/cnn_mse/validation_examples.png
+  --checkpoint CNN/outputs/tuning_mse/lr_0p0005_bs_32/best_model.pt \
+  --output CNN/outputs/tuning_mse/selected_validation_examples.png
 ```
 
 ## Test evaluation
 
+Final test results are calculated using the same selected checkpoint (learning rate `0.0005`, batch size 32, best epoch 10):
+
 ```bash
 python3 CNN/evaluate.py \
   --data-root shared_data \
-  --checkpoint CNN/outputs/cnn_mse/best_model.pt \
+  --checkpoint CNN/outputs/tuning_mse/lr_0p0005_bs_32/best_model.pt \
   --batch-size 32 \
-  --output-dir CNN/outputs/cnn_mse/test
+  --output-dir CNN/outputs/tuning_mse/test
 ```
-
-Evaluation reports mean and standard deviation over the test set for normalized ab-space MSE and MAE, reconstructed RGB PSNR and SSIM, and inference time. It also produces random, best-case, failure-case, and class-based comparison grids.
-
-The selected MSE model produced:
-
-| Metric | Mean | Standard deviation |
-|---|---:|---:|
-| Normalized ab MSE | 0.008248 | 0.009561 |
-| Normalized ab MAE | 0.061918 | 0.032734 |
-| RGB PSNR | 25.2255 | 4.2655 |
-| RGB SSIM | 0.9386 | 0.0557 |
 
 ## File overview
 
